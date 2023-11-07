@@ -263,10 +263,10 @@ impl StableDiffusionConfig {
         // https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/blob/main/unet/config.json
         let unet = unet_2d::UNet2DConditionModelConfig {
             blocks: vec![
-                bc(384, Some(1), 6),
-                bc(768, Some(1), 12),
-                bc(1536, Some(1), 24),
-                bc(1536, Some(1), 24),
+                bc(384, None, 6),
+                bc(768, Some(4), 12),
+                bc(1536, Some(4), 24),
+                bc(1536, None, 24),
             ],
             center_input_sample: false,
             cross_attention_dim: 1280,
