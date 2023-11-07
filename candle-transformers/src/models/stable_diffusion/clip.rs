@@ -102,6 +102,21 @@ impl Config {
         }
     }
 
+    // https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/blob/main/text_encoder_2/config.json
+    pub fn sdxlrf2() -> Self {
+        Self {
+            vocab_size: 49408,
+            embed_dim: 1280,
+            intermediate_size: 5120,
+            max_position_embeddings: 77,
+            pad_with: Some("!".to_string()),
+            num_hidden_layers: 32,
+            num_attention_heads: 20,
+            projection_dim: 1280,
+            activation: Activation::Gelu,
+        }
+    }
+
     pub fn ssd1b() -> Self {
         Self::sdxl()
     }
