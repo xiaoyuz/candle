@@ -117,6 +117,21 @@ impl Config {
         }
     }
 
+    // https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/blob/main/text_encoder/config.json
+    pub fn sdus() -> Self {
+        Self {
+            vocab_size: 49408,
+            embed_dim: 512,
+            intermediate_size: 4096,
+            max_position_embeddings: 77,
+            pad_with: Some("!".to_string()),
+            num_hidden_layers: 23,
+            num_attention_heads: 16,
+            projection_dim: 512,
+            activation: Activation::Gelu,
+        }
+    }
+
     pub fn ssd1b() -> Self {
         Self::sdxl()
     }

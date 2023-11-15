@@ -331,6 +331,88 @@ impl StableDiffusionConfig {
         )
     }
 
+    fn sdus_(
+        sliced_attention_size: Option<usize>,
+        height: Option<usize>,
+        width: Option<usize>,
+        prediction_type: schedulers::PredictionType,
+    ) -> Self {
+        let bc = |out_channels, use_cross_attn, attention_head_dim| unet_2d::BlockConfig {
+            out_channels,
+            use_cross_attn,
+            attention_head_dim,
+        };
+        // https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/blob/main/unet/config.json
+        let unet = unet_2d::UNet2DConditionModelConfig {
+            blocks: vec![
+                bc(256, None, 8),
+                bc(512, Some(2), 8),
+                bc(512, Some(2), 8),
+                bc(1024, None, 8),
+            ],
+            center_input_sample: false,
+            cross_attention_dim: 1024,
+            downsample_padding: 1,
+            flip_sin_to_cos: true,
+            freq_shift: 0.,
+            layers_per_block: 2,
+            mid_block_scale_factor: 1.,
+            norm_eps: 1e-5,
+            norm_num_groups: 32,
+            sliced_attention_size,
+            use_linear_projection: true,
+        };
+        // https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler/blob/main/vae/config.json
+        let autoencoder = vae::AutoEncoderKLConfig {
+            block_out_channels: vec![128, 256, 512],
+            layers_per_block: 2,
+            latent_channels: 4,
+            norm_num_groups: 32,
+        };
+        let scheduler = ddim::DDIMSchedulerConfig {
+            prediction_type,
+            ..Default::default()
+        };
+
+        let height = if let Some(height) = height {
+            assert_eq!(height % 8, 0, "height has to be divisible by 8");
+            height
+        } else {
+            1024
+        };
+
+        let width = if let Some(width) = width {
+            assert_eq!(width % 8, 0, "width has to be divisible by 8");
+            width
+        } else {
+            1024
+        };
+
+        Self {
+            width,
+            height,
+            clip: clip::Config::sdus(),
+            clip2: None,
+            autoencoder,
+            scheduler,
+            unet,
+        }
+    }
+
+    pub fn sdus(
+        sliced_attention_size: Option<usize>,
+        height: Option<usize>,
+        width: Option<usize>,
+    ) -> Self {
+        Self::sdus_(
+            sliced_attention_size,
+            height,
+            width,
+            // https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/blob/main/scheduler/scheduler_config.json
+            schedulers::PredictionType::Epsilon,
+        )
+    }
+
     pub fn ssd1b(
         sliced_attention_size: Option<usize>,
         height: Option<usize>,
